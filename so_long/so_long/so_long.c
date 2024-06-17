@@ -6,7 +6,7 @@
 /*   By: jjaen-mo <jjaen-mo@student.42malaga.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/11 12:28:31 by ldi-gius          #+#    #+#             */
-/*   Updated: 2024/06/17 08:40:26 by jjaen-mo         ###   ########.fr       */
+/*   Updated: 2024/06/17 12:12:21 by jjaen-mo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,127 @@ void    ft_ini(t_sl *sl)
 	sl->enemy = 0;
 	sl->chest = 0;
 	sl->map_splited = 0;
+	sl->map_cpy = 0;
 	sl->map_string = 0;
 	sl->height = 0;
 	sl->width = 0;
+	sl->player_num = 0;
+	sl->enemy_num = 0;
+	sl->chest_num = 0;
+	sl->exit_num = 0;
+}
+
+void	ft_check_chest_win(t_sl *sl)
+{
+	int	i;
+	int	j;
+
+	i = 0;
+	while (sl->map_cpy[i])
+	{
+		j = 0;
+		while (sl->map_cpy[i][j])
+		{
+			if (sl->map_cpy[i][j] == 'C')
+				perror("Can't take all chests");	//NEED EXIT
+			if (sl->map_cpy[i][j] == 'E')
+				perror("Can't find the exit");	//NEED EXIT
+			j++;
+		}
+		i++;
+	}
+}
+
+void	ft_flood_fill(t_sl *sl, int pl_pos_x, int pl_pos_y)
+{
+	char	pos;
+
+	pos = sl->map_cpy[pl_pos_y][pl_pos_x];
+	if (pos != '1' && pos != 'F' && pos != 'X')
+	{
+		sl->map_cpy[pl_pos_y][pl_pos_x] = 'F';
+		ft_flood_fill(sl, pl_pos_x + 1, pl_pos_y);
+		ft_flood_fill(sl, pl_pos_x - 1, pl_pos_y);
+		ft_flood_fill(sl, pl_pos_x, pl_pos_y + 1);
+		ft_flood_fill(sl, pl_pos_x, pl_pos_y - 1);
+	}
+}
+
+void	ft_check_win(t_sl *sl)
+{
+	int	pl_pos_x;
+	int	pl_pos_y;
+
+	pl_pos_x = sl->player_pos_x;
+	pl_pos_y = sl->player_pos_y;
+	ft_flood_fill(sl, pl_pos_x, pl_pos_y);
+	ft_check_chest_win(sl);
+}
+
+void	ft_check_counts(t_sl *sl)
+{
+	if (sl->player_num != 1)
+	{
+		perror("Error with player");	//NEED EXIT
+	}
+	if (sl->exit_num != 1)
+	{
+		perror("Error with exit");	//NEED EXIT
+	}
+	if (sl->chest_num < 1)
+	{
+		perror("Error with chests");	//NEED EXIT
+	}
+}
+
+
+void	ft_check_elemnts(t_sl *sl)
+{
+	int	i;
+	int	j;
+
+	i = 0;
+	while(sl->map_splited[i])
+	{
+		j = 0;
+		while (sl->map_splited[i][j])
+		{
+			if (ft_strchr("PEC01X", sl->map_splited[i][j]) == NULL)
+				ft_printf("unrecognized element: %c\n", sl->map_splited[i][j]); //NEED EXIT
+			if (sl->map_splited[i][j] == 'P')
+			{
+				sl->player_num++;
+				sl->player_pos_x = j;
+				sl->player_pos_y = i;
+			}
+			if (sl->map_splited[i][j] == 'C')
+				sl->chest_num++;
+			if (sl->map_splited[i][j] == 'E')
+				sl->exit_num++;
+			j++;
+		}
+		i++;
+	}
+}
+
+void	ft_check_map(t_sl *sl)
+{
+	int	i;
+	int	j;
+
+	i = 0;
+	while (sl->map_splited[i])
+	{
+		j = 0;
+		while (sl->map_splited[i][j])
+			j++;
+		if (j != sl->width)
+			perror("Not rectangle"); //NEED EXIT
+		i++;
+	}
+	ft_check_elemnts(sl);
+	ft_check_counts(sl);
+	ft_check_win(sl);
 }
 
 char    *ft_read_file(const char *file)
@@ -56,10 +174,10 @@ void   ft_read_map(const char *file, t_sl *sl)
     int i;
     int j;
 
+    i = 0;
     sl->map_string = ft_read_file(file);
     sl->map_splited = ft_split(sl->map_string, '\n');
-    i = 0;
-    i = 0;
+	sl->map_cpy= ft_split(sl->map_string, '\n');
 	while (sl->map_splited[i])
 	{
 		j = 0;
@@ -94,15 +212,13 @@ int main (int argc, char **argv)
     if (ft_check_ber(argv[1]) == 1)
     {
         ft_read_map(argv[1], sl);
+		ft_check_map(sl);
     }
-    return (perror("not .ber"),1);
+    return (printf("altura: %i\nancho: %i\nplayers: %i\nchests: %i\nexit: %i\nplayer pos: %i,%i ", sl->height, sl->width, sl->player_num, sl->chest_num, sl->exit_num, sl->player_pos_x, sl->player_pos_y) ,0);
 
     /*
     mlx_t *sl;
     sl = mlx_init(128,128,"hola", false);
     return (perror("asgaefgafr"), 0);
     */
-}
-    //mlx = mlx_init(128,128,"hola", false);
-    //return (perror("asgaefgafr"), 0);
 }
