@@ -6,7 +6,7 @@
 /*   By: jjaen-mo <jjaen-mo@student.42malaga.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/11 12:37:09 by ldi-gius          #+#    #+#             */
-/*   Updated: 2024/06/18 12:11:20 by jjaen-mo         ###   ########.fr       */
+/*   Updated: 2024/06/18 13:42:41 by jjaen-mo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,8 @@ typedef struct s_sl
 	int				player_num;
 	int				player_pos_x;
 	int				player_pos_y;
+	int				move_x;
+	int				move_y;
 	int				enemy_num;
 	int				chest_num;
 	int				exit_num;
@@ -41,6 +43,7 @@ typedef struct s_sl
 	char*			map_string;
     int     		height;
     int     		width;
+	int				steps;
 
 }   t_sl;
 
