@@ -6,7 +6,7 @@
 /*   By: jjaen-mo <jjaen-mo@student.42malaga.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/11 12:28:31 by ldi-gius          #+#    #+#             */
-/*   Updated: 2024/06/18 12:36:33 by jjaen-mo         ###   ########.fr       */
+/*   Updated: 2024/06/18 12:43:24 by jjaen-mo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -224,18 +224,18 @@ void	ft_load_textures(t_sl *sl)
 	mlx_delete_texture(img);
 	
 }
-
-void	ft_generate_map(t_sl *sl)
+/*
+void	ft_generate_map(sl_t *sl)
 {
 	
 }
 
-void	ft_run_game(t_sl *sl)
+void	ft_run_game(sl_t *sl)
 {
 	ft_generate_map(sl);
 }
 
-
+*/
 int main (int argc, char **argv)
 {
     t_sl    *sl;
@@ -250,7 +250,7 @@ int main (int argc, char **argv)
         ft_read_map(argv[1], sl);
 		ft_check_map(sl);
 		sl->mlx = mlx_init(sl->width * 64, sl->height * 64, "so_long", false);
-		ft_run_game(sl);
+		//ft_run_game(sl);
 	}
     return (printf("altura: %i\nancho: %i\nplayers: %i\nchests: %i\nexit: %i\nplayer pos: %i,%i ", sl->height, sl->width, sl->player_num, sl->chest_num, sl->exit_num, sl->player_pos_x, sl->player_pos_y) ,0);
 
