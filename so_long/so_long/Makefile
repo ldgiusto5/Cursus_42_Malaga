@@ -10,13 +10,11 @@ DATE = $(shell /usr/bin/date)
 
 all: $(NAME)
 
-$(NAME): $(LIBFT) $(PRINTF) $(MLX42) $(OBJS)
+$(NAME): $(LIBFT) $(PRINTF) $(OBJS)
 	@gcc $(FLAGS) $(OBJS) $(MLX42) $(LIBFT) $(PRINTF) -Iinclude -ldl -lglfw -pthread -lm -o $(NAME)
 
 $(OBJS): $(SRCS)
 	gcc $(FLAGS) -c $(SRCS)
-$(MLX42):
-	make -C MLX42
 $(LIBFT):
 	make -C ../libft
 $(PRINTF):
@@ -24,13 +22,11 @@ $(PRINTF):
 
 clean:
 	@rm -f $(OBJS)
-	make -C MLX42 clean
 	make -C ../libft clean
 	make -C ../printf clean
 
 fclean:
 	@rm -f $(OBJS) $(NAME) $(BONUS_OBJS)
-	make -C MLX42 fclean
 	make -C ../libft fclean
 	make -C ../printf fclean
 
