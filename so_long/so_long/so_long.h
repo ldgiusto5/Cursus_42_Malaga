@@ -6,7 +6,7 @@
 /*   By: jjaen-mo <jjaen-mo@student.42malaga.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/11 12:37:09 by ldi-gius          #+#    #+#             */
-/*   Updated: 2024/06/17 11:44:15 by jjaen-mo         ###   ########.fr       */
+/*   Updated: 2024/06/18 12:11:20 by jjaen-mo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ typedef struct s_sl
 {
     mlx_t   		*mlx;
     mlx_image_t		*player;
-	mlx_image_t		*backg;
+	mlx_image_t		*floor;
 	mlx_image_t		*wall;
 	mlx_image_t		*exit;
 	mlx_image_t		*enemy;
