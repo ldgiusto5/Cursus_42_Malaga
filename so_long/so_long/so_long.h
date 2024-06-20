@@ -6,7 +6,7 @@
 /*   By: jjaen-mo <jjaen-mo@student.42malaga.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/11 12:37:09 by ldi-gius          #+#    #+#             */
-/*   Updated: 2024/06/19 10:03:16 by jjaen-mo         ###   ########.fr       */
+/*   Updated: 2024/06/20 15:45:56 by jjaen-mo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,8 @@
 
 typedef struct s_sl
 {
-    mlx_t   		*mlx;
-    mlx_image_t		*player;
+	mlx_t			*mlx;
+	mlx_image_t		*player;
 	mlx_image_t		*floor;
 	mlx_image_t		*wall;
 	mlx_image_t		*exit;
@@ -40,13 +40,38 @@ typedef struct s_sl
 	int				enemy_num;
 	int				chest_num;
 	int				exit_num;
-	char**			map_splited;
-	char**			map_cpy;
-	char*			map_string;
-    int     		height;
-    int     		width;
+	char			**map_splited;
+	char			**map_cpy;
+	char			*map_string;
+	int				height;
+	int				width;
 	int				steps;
+}	t_sl;
 
-}   t_sl;
+void	ft_free_game(void *param, char *str);
+
+void	ft_check_win(t_sl *sl);
+
+int		ft_check_ber(const char *file);
+
+void	ft_read_map(const char *file, t_sl *sl);
+
+void	ft_check_map(t_sl *sl);
+
+void	ft_load_textures(t_sl *sl);
+
+void	ft_ini(t_sl *sl);
+
+void	ft_movement(mlx_key_data_t paramkey, void *param);
+
+void	ft_generate_map(mlx_t *mlx, t_sl *sl);
+
+void	ft_wall(mlx_t *mlx, int height, int width, t_sl *sl);
+
+void	ft_floor(mlx_t *mlx, int height, int width, t_sl *sl);
+
+void	ft_player(mlx_t *mlx, int height, int width, t_sl *sl);
+
+void	ft_steps(t_sl *sl);
 
 #endif
