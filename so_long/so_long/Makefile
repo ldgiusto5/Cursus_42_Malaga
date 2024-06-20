@@ -24,13 +24,11 @@ $(PRINTF):
 
 clean:
 	@rm -f $(OBJS)
-	make -C ../MLX42/build clean
 	make -C ../libft clean
 	make -C ../printf clean
 
 fclean:
 	@rm -f $(OBJS) $(NAME) $(BONUS_OBJS)
-	make -C ../MLX42/build clean
 	make -C ../libft fclean
 	make -C ../printf fclean
 
