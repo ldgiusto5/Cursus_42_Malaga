@@ -6,7 +6,7 @@
 /*   By: jjaen-mo <jjaen-mo@student.42malaga.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/11 12:28:31 by ldi-gius          #+#    #+#             */
-/*   Updated: 2024/06/18 14:41:18 by jjaen-mo         ###   ########.fr       */
+/*   Updated: 2024/06/19 10:20:08 by jjaen-mo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,8 @@ void    ft_ini(t_sl *sl)
 	sl->move_x = 0;
 	sl->move_y = 0;
 	sl->steps = 0;
+	sl->steps_img = 0;
+	sl->phrase = 0;
 }
 
 void	ft_free_map(t_sl *sl)
@@ -56,11 +58,14 @@ void	ft_free_game(t_sl *sl)
 	mlx_delete_image(sl->mlx, sl->chest);
 	mlx_delete_image(sl->mlx, sl->player);
 	mlx_delete_image(sl->mlx, sl->exit);
-	mlx_delete_image(sl->mlx, sl->player);
+	mlx_delete_image(sl->mlx, sl->enemy);
+	mlx_delete_image(sl->mlx, sl->phrase);
+	mlx_delete_image(sl->mlx, sl->steps_img);
 	free(sl->map_splited);
 	free(sl->map_cpy);
 	free(sl);
-	mlx_close_window(sl->mlx);
+	if (sl->mlx != NULL)
+		mlx_close_window(sl->mlx);
 	exit(EXIT_SUCCESS);
 }
 
@@ -320,26 +325,16 @@ void	ft_generate_map(mlx_t *mlx, t_sl *sl)
 
 void	ft_steps(t_sl *sl)
 {
-	mlx_image_t			*phrase;
-	mlx_image_t			*steps;
 	char				*str;
-	static int			first = 0;
-	mlx_image_t			*old_steps;
 
-	steps = NULL;
-	old_steps = NULL;
-	old_steps = steps;
 	str = ft_itoa(sl->steps);
-	if (first < 2147483647)
+	if (sl->steps < 2147483647)
 	{
-		phrase = mlx_put_string(sl->mlx, "steps: ", 0, 0);
-		mlx_image_to_window(sl->mlx, phrase, 0, 0);
-		steps = mlx_put_string(sl->mlx, str, 64, 0);
-		mlx_image_to_window(sl->mlx, steps, 64, 0);
-		first++;
+		sl->phrase = mlx_put_string(sl->mlx, "steps: ", 0, 0);
+		mlx_image_to_window(sl->mlx, sl->phrase, 0, 0);
+		sl->steps_img = mlx_put_string(sl->mlx, str, 64, 0);
+		mlx_image_to_window(sl->mlx, sl->steps_img, 64, 0);
 	}
-	if (old_steps)
-		mlx_delete_image(sl->mlx, old_steps);
 	free(str);
 }
 
@@ -361,9 +356,10 @@ void	ft_move_up(t_sl *sl)
 		if (sl->map_splited[sl->move_x - 1]
 			[sl->move_y] == 'C')
 			sl->chest_num--;
-		if (sl->map_splited[sl->move_x - 1]
-			[sl->move_y] == 'E'
-			&& sl->chest_num == 0)
+		if ((sl->map_splited[sl->move_x - 1]
+			[sl->move_y] == 'E' && sl->chest_num == 0) 
+			|| sl->map_splited[sl->move_x - 1]
+			[sl->move_y] == 'X')
 			ft_exit_game(sl);
 		else
 		{
@@ -388,9 +384,10 @@ void	ft_move_down(t_sl *sl)
 		if (sl->map_splited[sl->move_x + 1]
 			[sl->move_y] == 'C')
 			sl->chest_num--;
-		if (sl->map_splited[sl->move_x + 1]
-			[sl->move_y] == 'E'
-			&& sl->chest_num == 0)
+		if ((sl->map_splited[sl->move_x + 1]
+			[sl->move_y] == 'E' && sl->chest_num == 0) 
+			|| sl->map_splited[sl->move_x + 1]
+			[sl->move_y] == 'X')
 			ft_exit_game(sl);
 		else
 		{
@@ -415,9 +412,10 @@ void	ft_move_left(t_sl *sl)
 		if (sl->map_splited[sl->move_x]
 			[sl->move_y - 1] == 'C')
 			sl->chest_num--;
-		if (sl->map_splited[sl->move_x]
-			[sl->move_y - 1] == 'E'
-			&& sl->chest_num == 0)
+		if ((sl->map_splited[sl->move_x]
+			[sl->move_y - 1] == 'E' && sl->chest_num == 0)
+			|| sl->map_splited[sl->move_x]
+			[sl->move_y - 1] == 'X')
 			ft_exit_game(sl);
 		else
 		{
@@ -442,9 +440,10 @@ void	ft_move_right(t_sl *sl)
 		if (sl->map_splited[sl->move_x]
 			[sl->move_y + 1] == 'C')
 			sl->chest_num--;
-		if (sl->map_splited[sl->move_x]
-			[sl->move_y + 1] == 'E'
-			&& sl->chest_num == 0)
+		if ((sl->map_splited[sl->move_x]
+			[sl->move_y + 1] == 'E' && sl->chest_num == 0) 
+			||	sl->map_splited[sl->move_x]
+			[sl->move_y + 1] == 'X')
 			ft_exit_game(sl);
 		else
 		{

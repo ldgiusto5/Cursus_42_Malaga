@@ -6,7 +6,7 @@
 /*   By: jjaen-mo <jjaen-mo@student.42malaga.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/11 12:37:09 by ldi-gius          #+#    #+#             */
-/*   Updated: 2024/06/18 13:42:41 by jjaen-mo         ###   ########.fr       */
+/*   Updated: 2024/06/19 10:03:16 by jjaen-mo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,8 @@ typedef struct s_sl
 	mlx_image_t		*exit;
 	mlx_image_t		*enemy;
 	mlx_image_t		*chest;
+	mlx_image_t		*phrase;
+	mlx_image_t		*steps_img;
 	int				player_num;
 	int				player_pos_x;
 	int				player_pos_y;
