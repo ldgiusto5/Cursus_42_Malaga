@@ -37,35 +37,58 @@ void    ft_ini(t_sl *sl)
 	sl->phrase = 0;
 }
 
-void	ft_free_map(t_sl *sl)
+char	**ft_free_map(char **map)
 {
 	int	i;
 
 	i = 0;
-	while (i < sl->width)
+	while (map[i])
 	{
-		free(sl->map_splited[i]);
+		free(map[i]);
 		i++;
 	}
-	free(sl->map_splited);
-	sl->map_splited = NULL;
+	free(map);
+	return (NULL);
 }
 
-void	ft_free_game(t_sl *sl)
+void	ft_free_mlx(void *param)
 {
-	mlx_delete_image(sl->mlx, sl->floor);
-	mlx_delete_image(sl->mlx, sl->wall);
-	mlx_delete_image(sl->mlx, sl->chest);
-	mlx_delete_image(sl->mlx, sl->player);
-	mlx_delete_image(sl->mlx, sl->exit);
-	mlx_delete_image(sl->mlx, sl->enemy);
-	mlx_delete_image(sl->mlx, sl->phrase);
-	mlx_delete_image(sl->mlx, sl->steps_img);
-	free(sl->map_splited);
-	free(sl->map_cpy);
-	free(sl);
-	if (sl->mlx != NULL)
-		mlx_close_window(sl->mlx);
+	t_sl	*delete;
+
+	delete = (t_sl *)param;
+	if (delete->floor != 0)
+		mlx_delete_image(delete->mlx, delete->floor);
+	if (delete->wall != 0)
+		mlx_delete_image(delete->mlx, delete->wall);
+	if (delete->chest != 0)
+		mlx_delete_image(delete->mlx, delete->chest);
+	if (delete->player != 0)
+		mlx_delete_image(delete->mlx, delete->player);
+	if (delete->exit != 0)
+		mlx_delete_image(delete->mlx, delete->exit);
+	if (delete->enemy != 0)
+		mlx_delete_image(delete->mlx, delete->enemy);
+	if (delete->phrase != 0)
+		mlx_delete_image(delete->mlx, delete->phrase);
+	if (delete->steps_img != 0)
+		mlx_delete_image(delete->mlx, delete->steps_img);
+	if (delete->mlx != 0)
+		mlx_terminate(delete->mlx);
+}
+
+void	ft_free_game(void *param, char *str)
+{
+	t_sl	*delete;
+
+	delete = (t_sl *)param;
+	ft_free_mlx(param);
+	free(delete->map_string);
+	if (delete->map_splited != 0)
+		ft_free_map(delete->map_splited);
+	if (delete->map_cpy != 0)
+		ft_free_map(delete->map_cpy);
+	free(delete);
+	ft_printf("%s", str);
 	exit(EXIT_SUCCESS);
 }
 
@@ -81,9 +104,9 @@ void	ft_check_chest_win(t_sl *sl)
 		while (sl->map_cpy[i][j])
 		{
 			if (sl->map_cpy[i][j] == 'C')
-				perror("Can't take all chests");	//NEED EXIT
+				ft_free_game(sl, "Can't take all chests\n");
 			if (sl->map_cpy[i][j] == 'E')
-				perror("Can't find the exit");	//NEED EXIT
+				ft_free_game(sl, "Can't find the exit\n");
 			j++;
 		}
 		i++;
@@ -95,8 +118,13 @@ void	ft_flood_fill(t_sl *sl, int pl_pos_x, int pl_pos_y)
 	char	pos;
 
 	pos = sl->map_cpy[pl_pos_y][pl_pos_x];
-	if (pos != '1' && pos != 'F' && pos != 'X')
+	if (pos != '1' && pos != 'F' && pos != 'X' && pos != 'J')
 	{
+		if (sl->map_cpy[pl_pos_y][pl_pos_x] == 'E')
+		{
+			sl->map_cpy[pl_pos_y][pl_pos_x] = 'J';
+			return;
+		}
 		sl->map_cpy[pl_pos_y][pl_pos_x] = 'F';
 		ft_flood_fill(sl, pl_pos_x + 1, pl_pos_y);
 		ft_flood_fill(sl, pl_pos_x - 1, pl_pos_y);
@@ -120,15 +148,15 @@ void	ft_check_counts(t_sl *sl)
 {
 	if (sl->player_num != 1)
 	{
-		perror("Error with player");	//NEED EXIT
+		ft_free_game(sl, "Error with player\n");
 	}
 	if (sl->exit_num != 1)
 	{
-		perror("Error with exit");	//NEED EXIT
+		ft_free_game(sl, "Error with exit\n");
 	}
 	if (sl->chest_num < 1)
 	{
-		perror("Error with chests");	//NEED EXIT
+		ft_free_game(sl, "Error with chests\n");
 	}
 }
 
@@ -145,7 +173,9 @@ void	ft_check_elemnts(t_sl *sl)
 		while (sl->map_splited[i][j])
 		{
 			if (ft_strchr("PEC01X", sl->map_splited[i][j]) == NULL)
-				ft_printf("unrecognized element: %c\n", sl->map_splited[i][j]); //NEED EXIT
+			{
+				ft_free_game(sl, "Use only PEC01X in map, please\n");
+			}
 			if (sl->map_splited[i][j] == 'P')
 			{
 				sl->player_num++;
@@ -174,7 +204,7 @@ void	ft_check_map(t_sl *sl)
 		while (sl->map_splited[i][j])
 			j++;
 		if (j != sl->width)
-			perror("Not rectangle"); //NEED EXIT
+			ft_free_game(sl, "Not rectangle map\n");
 		i++;
 	}
 	ft_check_elemnts(sl);
@@ -182,7 +212,7 @@ void	ft_check_map(t_sl *sl)
 	ft_check_win(sl);
 }
 
-char    *ft_read_file(const char *file)
+char    *ft_read_file(const char *file, t_sl *sl)
 {
     int		fd;
 	int		fsize;
@@ -195,9 +225,9 @@ char    *ft_read_file(const char *file)
 	while (read(fd, buff, 1) == 1)
 		fsize++;
 	free(buff);
-	if (fsize == 0)
-		perror("Empty map");
 	close(fd);
+	if (fsize == 0)
+		ft_free_game(sl, "Empty file/folder\n");
 	fd = open(file, O_RDONLY);
 	file_read = malloc(sizeof(char) * fsize + 1);
 	read(fd, file_read, fsize);
@@ -212,7 +242,7 @@ void   ft_read_map(const char *file, t_sl *sl)
     int j;
 
     i = 0;
-    sl->map_string = ft_read_file(file);
+    sl->map_string = ft_read_file(file, sl);
     sl->map_splited = ft_split(sl->map_string, '\n');
 	sl->map_cpy= ft_split(sl->map_string, '\n');
 	while (sl->map_splited[i])
@@ -231,34 +261,13 @@ int	ft_check_ber(const char *file)
 {
     int size;
     size = ft_strlen(file);
-    if (file[size - 1] == 'r' && file[size - 2] == 'e' 
-        && file[size - 3] == 'b' && file[size - 4] == '.')
-        return (1);
+	if (size > 4)
+	{
+		if (file[size - 1] == 'r' && file[size - 2] == 'e' 
+			&& file[size - 3] == 'b' && file[size - 4] == '.')
+			return (1);
+	}
     return (0);
-}
-
-void	ft_load_textures(t_sl *sl)
-{
-	mlx_texture_t	*img;
-
-	img = mlx_load_png("./textures/player.png");
-	sl->player = mlx_texture_to_image(sl->mlx, img);
-	mlx_delete_texture(img);
-	img = mlx_load_png("./textures/enemy.png");
-	sl->enemy = mlx_texture_to_image(sl->mlx, img);
-	mlx_delete_texture(img);
-	img = mlx_load_png("./textures/chest.png");
-	sl->chest = mlx_texture_to_image(sl->mlx, img);
-	mlx_delete_texture(img);
-	img = mlx_load_png("./textures/floor.png");
-	sl->floor = mlx_texture_to_image(sl->mlx, img);
-	mlx_delete_texture(img);
-	img = mlx_load_png("./textures/exit.png");
-	sl->exit = mlx_texture_to_image(sl->mlx, img);
-	mlx_delete_texture(img);
-	img = mlx_load_png("./textures/wall.png");
-	sl->wall = mlx_texture_to_image(sl->mlx, img);
-	mlx_delete_texture(img);
 }
 
 void	ft_wall(mlx_t *mlx, int height, int width, t_sl *sl)
@@ -340,8 +349,33 @@ void	ft_steps(t_sl *sl)
 
 void	ft_exit_game(t_sl *sl)
 {
-	ft_printf("\nTerminas con %d movimientos.", sl->steps);
-	ft_free_game(sl);
+	ft_printf("\nTerminas con %d movimientos.\n", sl->steps);
+	ft_free_game(sl, "YOU WIN\n");
+}
+
+void	ft_load_textures(t_sl *sl)
+{
+	mlx_texture_t	*img;
+
+	img = mlx_load_png("./textures/player.png");
+	sl->player = mlx_texture_to_image(sl->mlx, img);
+	mlx_delete_texture(img);
+	img = mlx_load_png("./textures/enemy.png");
+	sl->enemy = mlx_texture_to_image(sl->mlx, img);
+	mlx_delete_texture(img);
+	img = mlx_load_png("./textures/chest.png");
+	sl->chest = mlx_texture_to_image(sl->mlx, img);
+	mlx_delete_texture(img);
+	img = mlx_load_png("./textures/floor.png");
+	sl->floor = mlx_texture_to_image(sl->mlx, img);
+	mlx_delete_texture(img);
+	img = mlx_load_png("./textures/exit.png");
+	sl->exit = mlx_texture_to_image(sl->mlx, img);
+	mlx_delete_texture(img);
+	img = mlx_load_png("./textures/wall.png");
+	sl->wall = mlx_texture_to_image(sl->mlx, img);
+	mlx_delete_texture(img);
+	ft_generate_map(sl->mlx, sl);
 }
 
 void	ft_move_up(t_sl *sl)
@@ -456,46 +490,36 @@ void	ft_move_right(t_sl *sl)
 	}
 }
 
-void	ft_movement(mlx_key_data_t paramkey, t_sl *sl)
+void	ft_movement(mlx_key_data_t paramkey, void *param)
 {
+	t_sl	*cpy;
+
+	cpy = (t_sl *)param;
 	if ((paramkey.key == MLX_KEY_W || paramkey.key == MLX_KEY_UP)
 		&& paramkey.action == MLX_PRESS)
-		ft_move_up(sl);
+		ft_move_up(cpy);
 	if ((paramkey.key == MLX_KEY_S || paramkey.key == MLX_KEY_DOWN)
 		&& paramkey.action == MLX_PRESS)
-		ft_move_down(sl);
+		ft_move_down(cpy);
 	if ((paramkey.key == MLX_KEY_A || paramkey.key == MLX_KEY_LEFT)
 		&& paramkey.action == MLX_PRESS)
-		ft_move_left(sl);
+		ft_move_left(cpy);
 	if ((paramkey.key == MLX_KEY_D || paramkey.key == MLX_KEY_RIGHT)
 		&& paramkey.action == MLX_PRESS)
-		ft_move_right(sl);
+		ft_move_right(cpy);
 	if ((paramkey.key == MLX_KEY_ESCAPE || paramkey.key == MLX_KEY_Q)
 		&& paramkey.action == MLX_PRESS)
 		{
-			ft_free_game(sl);
+			ft_free_game(cpy, "ESC\n");
 		}
-	ft_steps(sl);
-}
-
-void	ft_close_window(void *param)
-{
-	t_sl	*sl;
-
-	sl = (t_sl *)param;
-	free(sl->chest);
-	ft_free_map(sl);
-	mlx_close_window(sl->mlx);
+	ft_steps(cpy);
 }
 
 void	ft_run_game(t_sl *sl)
 {
-	ft_generate_map(sl->mlx, sl);
-	mlx_key_hook(sl->mlx, (mlx_keyfunc)ft_movement, sl);
-	mlx_close_hook(sl->mlx, ft_close_window, sl);
+	mlx_key_hook(sl->mlx, ft_movement, sl);
 	mlx_loop(sl->mlx);
-	mlx_terminate(sl->mlx);
-	ft_free_game(sl);
+	ft_free_game(sl, "Window closed\n");
 }
 
 
@@ -503,10 +527,11 @@ int main (int argc, char **argv)
 {
     t_sl    *sl;
     sl = malloc(sizeof(t_sl));
-    if (!sl)
-        return (perror("Malloc error"),1);
     if (argc != 2)
-        return (perror("Argument error"),1);
+	{
+		free(sl);
+        return (ft_printf("Argument error"), 1);
+	}
     ft_ini(sl);
     if (ft_check_ber(argv[1]) == 1)
     {
@@ -516,7 +541,8 @@ int main (int argc, char **argv)
 		ft_load_textures(sl);
 		ft_run_game(sl);
 	}
-    return (printf("altura: %i\nancho: %i\nplayers: %i\nchests: %i\nexit: %i\nplayer pos: %i,%i \n", sl->height, sl->width, sl->player_num, sl->chest_num, sl->exit_num, sl->player_pos_x, sl->player_pos_y) ,0);
+	free(sl);
+    return (0);
 
     /*
     mlx_t *sl;
